@@ -4,6 +4,7 @@ audioFormat=wav
 
 cd ~/Music
 
+# Unused but still pretty cool
 selectSong () {
     rm /tmp/selectSongFeedback
     rm /tmp/selectSongSelected
@@ -20,6 +21,14 @@ selectSong () {
 	rm /tmp/selectSongFeedback
 }
 
+selectSongShowAll () {
+    find | sort | sed 's/^./Music/' | dmenu -i -l 10 -p "$1" | sed 's/^Music/./'
+}
+
+selectSongShowAllDir () {
+	find -type -d | sort | sed 's/^./Music/' | dmenu -i -l 10 -p "$1" | sed 's/^Music//'
+}
+
 downloadYouTube () {
 	set -eo pipefail
 
@@ -33,12 +42,12 @@ downloadYouTube () {
 	url=$(echo -e "$titleHref" | awk '{print $(1)}' | sed 's/+/ /g' | dmenu -i -l 10 | sed 's/ /+/g' \
 	| xargs -I ~ grep ~ <(echo -e "$titleHref") | awk '{print $(2)}')
 
-	outputName=$(selectSong "Output Song Name: ")
+	outputName=$(selectSongShowAllDir "Output Song Place: ")
 
 	youtube-dl -o "$outputName.%(ext)s" -x --audio-format $audioFormat youtube.com$url
 }
 
-options="Play\nPause\nNext\nPrevious\nPlay Song\nAdd Song to Queue\nDownload Song From YouTube"
+options="Play\nPause\nNext\nPrevious\nPlay Song\nAdd Song to Queue\nClear Queue\nDownload Song From YouTube"
 
 case $(echo -e "$options" | dmenu -i -l $(echo -e "$options" | wc -l)) in
     "Play")
@@ -54,34 +63,38 @@ case $(echo -e "$options" | dmenu -i -l $(echo -e "$options" | wc -l)) in
         cmus-remote -r
         ;;
     "Play Song")
-		song=$(selectSong "Select Song: ")
-		if [ -f $song ]
+		song=$(selectSongShowAll "Select Song: ")
+		echo $song
+		if [ -f "$song" ]
 		then
-    		cmus-remote -f $song
-    	elif [ -d $song ]
+    		cmus-remote -f "$song"
+    	elif [ -d "$song" ]
     	then
         	case $(echo -e "Yes\nNo" | dmenu -i -p "Clear Queue?") in
 				"Yes")
     				cmus-remote -q -c
     				;;
 			esac
-    		files=$(find "$PWD/$song" | grep ".$audioFormat")
+    		files=$(find "$song" | grep ".$audioFormat" | sort)
     		echo -e "$files"
 			cmus-remote -f "$(echo -e "$files" | head -n 1)"
 			echo -e "$files" | tail -n +2 | xargs -n 1 -I {} cmus-remote -q {}
     	fi
         ;;
     "Add Song to Queue")
-        song=$(selectSong "Select Song: ")
-        if [ -f $song ]
+        song=$(selectSongShowAll "Select Song: ")
+        if [ -f "$song" ]
         then
-            cmus-remote -q $song
-        elif [ -d $song ]
+            cmus-remote -q "$song"
+        elif [ -d "$song" ]
         then
-        	find "$PWD/$song" \
+        	find "$song" \
         	| grep ".$audioFormat" \
         	| xargs -n 1 -I {} cmus-remote -q "{}"
         fi
+        ;;
+    "Clear Queue")
+        cmus-remote -q -c
         ;;
     "Download Song From YouTube")
         downloadYouTube
