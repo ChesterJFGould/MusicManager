@@ -37,7 +37,7 @@ downloadYouTube () {
 
 	echo -e "Selected Url $url"
 
-	~/.local/bin/youtube-dl -o "$outputName.%(ext)s" -x --audio-format $audioFormat youtube.com$url 2>> ~/musicManagerLogfile.txt
+	youtube-dl -o "$outputName.%(ext)s" -x --audio-format $audioFormat youtube.com$url 2>> ~/musicManagerLogfile.txt
 }
 
 options="Play\nPause\nNext\nPrevious\nPlay Song\nAdd Song to Queue\nDownload Song From YouTube"
