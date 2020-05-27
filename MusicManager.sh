@@ -22,11 +22,11 @@ selectSong () {
 }
 
 selectSongShowAll () {
-    find | sort | sed 's/^./Music/' | dmenu -i -l 10 -p "$1" | sed 's/^Music/./'
+    find | sort -V | sed 's/^./Music/' | dmenu -i -l 10 -p "$1" | sed 's/^Music/./'
 }
 
 selectSongShowAllDir () {
-	find -type -d | sort | sed 's/^./Music/' | dmenu -i -l 10 -p "$1" | sed 's/^Music//'
+	find -type d | sort -V | sed 's/^./Music/' | dmenu -i -l 10 -p "$1" | sed 's/^Music/./'
 }
 
 downloadYouTube () {
@@ -64,7 +64,7 @@ case $(echo -e "$options" | dmenu -i -l $(echo -e "$options" | wc -l)) in
         ;;
     "Play Song")
 		song=$(selectSongShowAll "Select Song: ")
-		echo $song
+
 		if [ -f "$song" ]
 		then
     		cmus-remote -f "$song"
