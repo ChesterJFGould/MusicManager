@@ -39,12 +39,12 @@ downloadYouTube () {
 	echo "got html"
 
 	titleHref=$(paste <(echo -e "$html" | pup --charset UTF-8 '.yt-uix-tile-link[href*="watch"] attr{title}' \
-	| nl | sed 's/\s/+/g') <(echo -e "$html" | pup '.yt-uix-tile-link[href*="watch"] attr{href}'))
-
-	echo -e "$titleHref"
+		| nl | sed 's/\s/+/g' | sed 's/\[/\(/g' | sed 's/\]/\)/g' ) <(echo -e "$html" | pup '.yt-uix-tile-link[href*="watch"] attr{href}'))
 
 	url=$(echo -e "$titleHref" | awk '{print $(1)}' | sed 's/+/ /g' | dmenu -i -l 10 | sed 's/ /+/g' \
-	| xargs -I ~ grep ~ <(echo -e "$titleHref") | awk '{print $(2)}')
+		| xargs -I {} grep {} <(echo  "$titleHref") | awk '{print $(2)}')
+
+	echo -e "$url"
 
 	outputName=$(selectSongShowAllDir "Output Song Place: ")
 
