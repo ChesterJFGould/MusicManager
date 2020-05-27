@@ -32,7 +32,11 @@ selectSongShowAllDir () {
 downloadYouTube () {
 	set -eo pipefail
 
-	html=$(dmenu -i -p "YouTube Search: " | sed 's/ /+/g' | xargs -I~ curl -s https://www.youtube.com/results?q=~)
+	echo "Downloading"
+
+	html=$(dmenu -i -p "YouTube Search: " | sed 's/ /+/g' | xargs -I {} curl -s https://www.youtube.com/results?q={})
+
+	echo "got html"
 
 	titleHref=$(paste <(echo -e "$html" | pup --charset UTF-8 '.yt-uix-tile-link[href*="watch"] attr{title}' \
 	| nl | sed 's/\s/+/g') <(echo -e "$html" | pup '.yt-uix-tile-link[href*="watch"] attr{href}'))
