@@ -3,7 +3,7 @@ A simple bash script that uses dmenu, cmus, and youtube-dl to play and download 
 
 # Dependencies
 [cmus](https://github.com/cmus/cmus) <br/>
-[dmenu](https://tools.suckless.org/dmenu/) with the "incremental" and "non blocking stdin" patches applied. <br/>
+[dmenu](https://tools.suckless.org/dmenu/) <br/>
 [youtube-dl]( https://github.com/ytdl-org/youtube-dl/) <br/>
 [pup](https://github.com/EricChiang/pup)
 
