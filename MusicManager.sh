@@ -29,29 +29,68 @@ selectSongShowAllDir () {
 	find -type d | sort -V | sed 's/^./Music/' | dmenu -i -l 10 -p "$1" | sed 's/^Music/./'
 }
 
-downloadYouTube () {
+downloadSongYouTube () {
 	set -eo pipefail
 
-	echo "Downloading"
+	html=$(dmenu -i -p "YouTube Search: " \
+		| sed 's/ /+/g' \
+		| xargs -I {} curl -s https://www.youtube.com/results?q={})
 
-	html=$(dmenu -i -p "YouTube Search: " | sed 's/ /+/g' | xargs -I {} curl -s https://www.youtube.com/results?q={})
+	titleHref=$(paste <(echo -e "$html" \
+		| pup --charset UTF-8 '.yt-uix-tile-link[href*="watch"] attr{title}' \
+		| nl \
+		| sed 's/\s/+/g' \
+		| sed 's/\[/\(/g' \
+		| sed 's/\]/\)/g' ) <(echo -e "$html" \
+		| pup '.yt-uix-tile-link[href*="watch"] attr{href}'))
 
-	echo "got html"
-
-	titleHref=$(paste <(echo -e "$html" | pup --charset UTF-8 '.yt-uix-tile-link[href*="watch"] attr{title}' \
-		| nl | sed 's/\s/+/g' | sed 's/\[/\(/g' | sed 's/\]/\)/g' ) <(echo -e "$html" | pup '.yt-uix-tile-link[href*="watch"] attr{href}'))
-
-	url=$(echo -e "$titleHref" | awk '{print $(1)}' | sed 's/+/ /g' | dmenu -i -l 10 | sed 's/ /+/g' \
-		| xargs -I {} grep {} <(echo  "$titleHref") | awk '{print $(2)}')
-
-	echo -e "$url"
+	selectionNumber=$(echo -e "$titleHref" \
+		| awk '{print $1}' \
+		| sed 's/+/ /g' \
+		| dmenu -i -l 10 \
+		| awk '{print $1}' )
+	
+	url=$(echo -e "$titleHref" \
+		| awk 'NR == n {print $2}' n=$selectionNumber )
 
 	outputName=$(selectSongShowAllDir "Output Song Place: ")
 
 	youtube-dl -o "$outputName.%(ext)s" -x --audio-format $audioFormat youtube.com$url
 }
 
-options="Play\nPause\nNext\nPrevious\nPlay Song\nAdd Song to Queue\nClear Queue\nDownload Song From YouTube"
+downloadPlaylistYoutube () {
+	set -eo pipefail
+
+	html=$(dmenu -i -p "YouTube Search: " \
+		| sed 's/ /+/g' \
+		| xargs -I {} curl -s 'https://www.youtube.com/results?q={}&sp=EgIQAw%253D%253D')
+
+	titleNumVidsHref=$(paste 	<(echo -e "$html" \
+									| pup --charset UTF-8 '.yt-uix-tile-link[href*="watch"] attr{title}' \
+									| nl \
+									| sed 's/\s/+/g' \
+									| sed 's/\[/\(/g' \
+									| sed 's/\]/\)/g' ) \
+								<(echo -e "$html" \
+									| pup --charset UTF-8 '.formatted-video-count-label b text{}') \
+								<(echo -e "$html" \
+									| pup '.yt-uix-tile-link[href*="watch"] attr{href}'))
+
+	selectionNumber=$(echo -e "$titleNumVidsHref" \
+		| awk '{printf "%s | %s videos\n", $1, $2}' \
+		| sed 's/+/ /g' \
+		| dmenu -i -l 10 \
+		| awk '{print $1}' )
+
+	url=$(echo -e "$titleNumVidsHref" \
+		| awk 'NR == n {print $3}' n=$selectionNumber)
+
+	outputFolder=$(selectSongShowAllDir "Output Folder: ")
+
+	youtube-dl -o "$outputFolder/%(playlist_index)s.%(title)s.%(ext)s" -x --audio-format $audioFormat youtube.com$url
+}
+
+options="Play\nPause\nNext\nPrevious\nPlay Song\nAdd Song to Queue\nClear Queue\nDownload Song From YouTube\nDownload Playlist From YouTube"
 
 case $(echo -e "$options" | dmenu -i -l $(echo -e "$options" | wc -l)) in
     "Play")
@@ -102,6 +141,9 @@ case $(echo -e "$options" | dmenu -i -l $(echo -e "$options" | wc -l)) in
         cmus-remote -q -c
         ;;
     "Download Song From YouTube")
-        downloadYouTube
+        downloadSongYouTube
         ;;
+	"Download Playlist From YouTube")
+		downloadPlaylistYoutube	
+		;;
 esac
