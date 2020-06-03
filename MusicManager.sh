@@ -113,15 +113,11 @@ case $(echo -e "$options" | dmenu -i -l $(echo -e "$options" | wc -l)) in
     		cmus-remote -f "$song"
     	elif [ -d "$song" ]
     	then
-        	case $(echo -e "Yes\nNo" | dmenu -i -p "Clear Queue?") in
-				"Yes")
-    				cmus-remote -q -c
-    				;;
-			esac
+    		cmus-remote -q -c
     		files=$(find "$song" | grep ".$audioFormat" | sort -V)
     		echo -e "$files"
 			cmus-remote -f "$(echo -e "$files" | head -n 1)"
-			echo -e "$files" | tail -n +2 | xargs -n 1 -I {} cmus-remote -q {}
+			echo -e "$files" | tail -n +2 | xargs -0 -n 1 -I {} cmus-remote -q "{}"
     	fi
         ;;
     "Add Song to Queue")
@@ -133,8 +129,8 @@ case $(echo -e "$options" | dmenu -i -l $(echo -e "$options" | wc -l)) in
         then
         	find "$song" \
         	| grep ".$audioFormat" \
-		| sort -V \
-        	| xargs -n 1 -I {} cmus-remote -q "{}"
+			| sort -V \
+        	| xargs -0 -n 1 -I {} cmus-remote -q "{}"
         fi
         ;;
     "Clear Queue")
