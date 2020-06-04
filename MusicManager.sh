@@ -90,7 +90,7 @@ downloadPlaylistYoutube () {
 	youtube-dl -o "$outputFolder/%(playlist_index)s.%(title)s.%(ext)s" -x --audio-format $audioFormat youtube.com$url
 }
 
-options="Play\nPause\nNext\nPrevious\nPlay Song\nAdd Song to Queue\nClear Queue\nDownload Song From YouTube\nDownload Playlist From YouTube"
+options="Play\nPause\nNext\nPrevious\nPlay Song\nAdd Song to Queue\nClear Queue\nToggle Repeat Current\nDownload Song From YouTube\nDownload Playlist From YouTube"
 
 case $(echo -e "$options" | dmenu -i -l $(echo -e "$options" | wc -l)) in
     "Play")
@@ -135,6 +135,9 @@ case $(echo -e "$options" | dmenu -i -l $(echo -e "$options" | wc -l)) in
     "Clear Queue")
         cmus-remote -q -c
         ;;
+	"Toggle Repeat Current")
+		cmus-remote -C "toggle repeat_current"
+		;;
     "Download Song From YouTube")
         downloadSongYouTube
         ;;
