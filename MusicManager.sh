@@ -117,7 +117,7 @@ case $(echo -e "$options" | dmenu -i -l $(echo -e "$options" | wc -l)) in
     		files=$(find "$song" | grep ".$audioFormat" | sort -V)
     		echo -e "$files"
 			cmus-remote -f "$(echo -e "$files" | head -n 1)"
-			echo -e "$files" | tail -n +2 | xargs -0 -n 1 -I {} cmus-remote -q "{}"
+			echo -e "$files" | tail -n +2 | xargs -d "\n" -n 1 -I {} cmus-remote -q "{}"
     	fi
         ;;
     "Add Song to Queue")
@@ -130,7 +130,7 @@ case $(echo -e "$options" | dmenu -i -l $(echo -e "$options" | wc -l)) in
         	find "$song" \
         	| grep ".$audioFormat" \
 			| sort -V \
-        	| xargs -0 -n 1 -I {} cmus-remote -q "{}"
+        	| xargs -d "\n" -n 1 -I {} cmus-remote -q "{}"
         fi
         ;;
     "Clear Queue")
