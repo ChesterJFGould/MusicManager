@@ -115,7 +115,6 @@ case $(echo -e "$options" | dmenu -i -l $(echo -e "$options" | wc -l)) in
     	then
     		cmus-remote -q -c
     		files=$(find "$song" | grep ".$audioFormat" | sort -V)
-    		echo -e "$files"
 			cmus-remote -f "$(echo -e "$files" | head -n 1)"
 			echo -e "$files" | tail -n +2 | xargs -d "\n" -n 1 -I {} cmus-remote -q "{}"
     	fi
