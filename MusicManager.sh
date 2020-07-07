@@ -1,6 +1,7 @@
 #! /bin/bash
 
 audioFormat=wav
+scriptPath=$(dirname $(realpath $0))
 
 cd ~/Music
 
@@ -34,15 +35,16 @@ downloadSongYouTube () {
 
 	html=$(dmenu -i -p "YouTube Search: " \
 		| sed 's/ /+/g' \
-		| xargs -I {} curl -s https://www.youtube.com/results?q={})
+		| xargs -I {} phantomjs "$scriptPath/phantomjs_curl.js" 'https://www.youtube.com/results?q={}')
 
 	titleHref=$(paste <(echo -e "$html" \
-		| pup --charset UTF-8 '.yt-uix-tile-link[href*="watch"] attr{title}' \
+		| pup --charset UTF-8 '#video-title attr{title}' \
 		| nl \
 		| sed 's/\s/+/g' \
 		| sed 's/\[/\(/g' \
-		| sed 's/\]/\)/g' ) <(echo -e "$html" \
-		| pup '.yt-uix-tile-link[href*="watch"] attr{href}'))
+		| sed 's/\]/\)/g' ) \
+		<(echo -e "$html" \
+		| pup '#video-title attr{href}'))
 
 	selectionNumber=$(echo -e "$titleHref" \
 		| awk '{print $1}' \
@@ -63,18 +65,19 @@ downloadPlaylistYoutube () {
 
 	html=$(dmenu -i -p "YouTube Search: " \
 		| sed 's/ /+/g' \
-		| xargs -I {} curl -s 'https://www.youtube.com/results?q={}&sp=EgIQAw%253D%253D')
+		| xargs -I {} phantomjs "$scriptPath/phantomjs_curl.js" 'https://www.youtube.com/results?q={}&sp=EgIQAw%253D%253D')
 
-	titleNumVidsHref=$(paste 	<(echo -e "$html" \
-									| pup --charset UTF-8 '.yt-uix-tile-link[href*="watch"] attr{title}' \
-									| nl \
-									| sed 's/\s/+/g' \
-									| sed 's/\[/\(/g' \
-									| sed 's/\]/\)/g' ) \
-								<(echo -e "$html" \
-									| pup --charset UTF-8 '.formatted-video-count-label b text{}') \
-								<(echo -e "$html" \
-									| pup '.yt-uix-tile-link[href*="watch"] attr{href}'))
+	titleNumVidsHref=$(paste <(echo -e "$html" \
+			| pup --charset UTF-8 'span#video-title attr{title}' \
+			| nl \
+			| sed 's/\s/+/g' \
+			| sed 's/\[/\(/g' \
+			| sed 's/\]/\)/g' ) \
+		<(echo -e "$html" \
+			| pup --charset UTF-8 '.ytd-thumbnail-overlay-side-panel-renderer text{}' \
+			| awk 'NF') \
+		<(echo -e "$html" \
+			| pup 'a[href*="watch"].ytd-playlist-renderer attr{href}'))
 
 	selectionNumber=$(echo -e "$titleNumVidsHref" \
 		| awk '{printf "%s | %s videos\n", $1, $2}' \
