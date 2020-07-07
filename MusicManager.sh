@@ -75,9 +75,11 @@ downloadPlaylistYoutube () {
 			| sed 's/\]/\)/g' ) \
 		<(echo -e "$html" \
 			| pup --charset UTF-8 '.ytd-thumbnail-overlay-side-panel-renderer text{}' \
+			| uniq \
 			| awk 'NF') \
 		<(echo -e "$html" \
-			| pup 'a[href*="watch"].ytd-playlist-renderer attr{href}'))
+			| pup 'a[href*="watch"].ytd-playlist-renderer attr{href}' \
+			| uniq))
 
 	selectionNumber=$(echo -e "$titleNumVidsHref" \
 		| awk '{printf "%s | %s videos\n", $1, $2}' \
