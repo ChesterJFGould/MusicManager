@@ -55,7 +55,7 @@ downloadSongYouTube () {
 	url=$(echo -e "$titleHref" \
 		| awk 'NR == n {print $2}' n=$selectionNumber )
 
-	outputName=$(selectSongShowAllDir "Output Song Place: ")
+	outputName="$(selectSongShowAllDir 'Output Song Place: ')"
 
 	youtube-dl -o "$outputName.%(ext)s" -x --audio-format $audioFormat youtube.com$url
 }
