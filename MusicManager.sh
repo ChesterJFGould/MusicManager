@@ -95,9 +95,17 @@ downloadPlaylistYoutube () {
 	youtube-dl -o "$outputFolder/%(playlist_index)s.%(title)s.%(ext)s" -x --audio-format $audioFormat youtube.com$url
 }
 
+currentSong () {
+	song=$(cmus-remote -Q | grep file)
+	song=${song##*/}
+	song=${song%.*}
+
+	echo "$song"
+}
+
 options="Play\nPause\nNext\nPrevious\nPlay Song\nAdd Song to Queue\nClear Queue\nToggle Loop\nDownload Song From YouTube\nDownload Playlist From YouTube"
 
-case $(echo -e "$options" | dmenu -i -l $(echo -e "$options" | wc -l)) in
+case $(echo -e "$options" | dmenu -i -p "$(currentSong)" -l $(echo -e "$options" | wc -l)) in
     "Play")
         cmus-remote -p
         ;;
@@ -140,13 +148,13 @@ case $(echo -e "$options" | dmenu -i -l $(echo -e "$options" | wc -l)) in
     "Clear Queue")
         cmus-remote -q -c
         ;;
-	"Toogle Loop")
-		cmus-remote -C "toggle repeat_current"
-		;;
+    "Toggle Loop")
+	cmus-remote -C "toggle repeat_current"
+	;;
     "Download Song From YouTube")
         downloadSongYouTube
         ;;
-	"Download Playlist From YouTube")
-		downloadPlaylistYoutube	
-		;;
+    "Download Playlist From YouTube")
+	downloadPlaylistYoutube	
+	;;
 esac
