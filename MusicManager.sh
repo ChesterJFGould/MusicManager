@@ -92,7 +92,7 @@ downloadPlaylistYoutube () {
 
 	outputFolder=$(selectSongShowAllDir "Output Folder: ")
 
-	youtube-dl -o "$outputFolder/%(playlist_index)s.%(title)s.%(ext)s" -x --audio-format $audioFormat youtube.com$url
+	youtube-dl -i -o "$outputFolder/%(playlist_index)s.%(title)s.%(ext)s" -x --audio-format $audioFormat youtube.com$url
 }
 
 currentSong () {
